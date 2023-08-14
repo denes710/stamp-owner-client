@@ -36,6 +36,7 @@ class MySubscribeCallback(SubscribeCallback):
         pass
     def message(self, pubnub, message):
         print ("from device " + message.publisher + ": " + message.message)
+        global secret_token
         secret_token = message.message
 
 class MyServer(BaseHTTPRequestHandler):
