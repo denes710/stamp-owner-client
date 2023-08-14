@@ -28,7 +28,6 @@ request_input = {
 }
 headers = {"Authorization": "Bearer {}".format(secret_token)}
 response = requests.get(request_uri, data=json.dumps(request_input), headers=headers)
-print(response)
 deleg_attest = response.json()["delegated_attestation"]
 print("Server responded with json: {}".format(response_json))
 
@@ -46,9 +45,6 @@ nonce = web3.eth.get_transaction_count(public_key)
 # Initialize contract ABI and address
 f = open("abis/Stamper.json")
 stamper_abi = json.load(f)["abi"]
-# bytecode = json.load(f)["bytecode"]
-# my_contract = web3.eth.contract(abi=abi, bytecode=bytecode)
-
 # Create smart contract instance
 stamper_contract = web3.eth.contract(address=web3.toChecksumAddress(stamper_addr), abi=stamper_abi)
 # initialize the chain id, we need it to build the transaction for replay protection
@@ -61,8 +57,7 @@ stamp_input = (
         int(deleg_attest["data"]["expirationTime"]),
         bool(deleg_attest["data"]["revocable"]),
         deleg_attest["data"]["refUID"],
-        # deleg_attest["data"]["data"],
-        bytes("0x1".encode()),
+        bytes(deleg_attest["data"]["data"].encode()),
         int(deleg_attest["data"]["value"])
     ),
     (
@@ -74,7 +69,6 @@ stamp_input = (
 )
 
 print(stamp_input)
-
 call_function = stamper_contract.functions.stamp(stamp_input).buildTransaction({"chainId": chain_id, "from": public_key, "nonce": nonce})
 
 # Sign transaction
